@@ -8,13 +8,7 @@
 
 ## Overview
 
-This repository tracks my progress during the DevSynt Summer 2026 AI Automation Internship. I am building a production-ready WhatsApp bot that qualifies customers, offers booking slots, confirms appointments, and hands off to humans when needed.
-
-The project is divided into phases:
-- **Phase 1:** Design conversation flow, write messages, set up webhook (COMPLETED ✅)
-- **Phase 2:** Connect to Meta Cloud API, integrate calendar, build message routing
-- **Phase 3:** Deploy to production, monitor performance
-
+This repository tracks my progress during the DevSynt Summer 2026 AI Automation Internship.
 ---
 
 ## Task 1: Set Up n8n and Push to GitHub ✅
