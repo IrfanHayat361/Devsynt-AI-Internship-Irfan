@@ -1,0 +1,242 @@
+# WhatsApp Bot Messages - Dental Clinic
+
+## State 0: Language Detection
+(Automatic - no message sent. Bot checks if message contains Arabic script)
+
+---
+
+## State 1: Greeting + Intent
+
+### English:
+
+Welcome to [Smile Dental Clinic] 🦷
+
+Would you like to book an appointment, or do you have a question?
+
+1️⃣ Book an appointment
+2️⃣ Ask a question
+
+
+### Arabic:
+
+أهلا وسهلا بك في عيادة [اسم عيادتك] 🦷
+
+هل تريد حجز موعد أم لديك سؤال؟
+
+1️⃣ حجز موعد
+2️⃣ سؤال
+
+
+---
+
+## State 2: Choose Service
+
+### English:
+
+Great! Which service are you interested in?
+
+1️⃣ General Checkup - $50
+2️⃣ Professional Cleaning - $75
+3️⃣ Teeth Whitening - $150
+4️⃣ Back to menu
+
+
+### Arabic:
+
+رائع! أي خدمة تهمك؟
+
+1️⃣ فحص عام - 50 دولار
+2️⃣ تنظيف احترافي - 75 دولار
+3️⃣ تبييض الأسنان - 150 دولار
+4️⃣ العودة للقائمة
+
+
+---
+
+## State 3: Choose Timing
+
+### English:
+
+Perfect! When would you like your appointment?
+
+1️⃣ Tomorrow
+2️⃣ Next 2-3 days
+3️⃣ Next week
+4️⃣ Specific date (please type)
+
+
+### Arabic:
+
+ممتاز! متى تريد موعدك؟
+
+1️⃣ غدا
+2️⃣ في غضون 2-3 أيام
+3️⃣ الأسبوع القادم
+4️⃣ تاريخ محدد (اكتبه)
+
+
+---
+
+## State 4: Offer Available Slots
+
+### English:
+
+Here are your available slots for [Service Name] on [Date]:
+
+1️⃣ 09:00 AM
+2️⃣ 11:00 AM
+3️⃣ 02:00 PM
+4️⃣ 04:00 PM
+
+Which time works best?
+
+
+### Arabic:
+
+إليك الأوقات المتاحة لـ [اسم الخدمة] في [التاريخ]:
+
+1️⃣ 09:00 ص
+2️⃣ 11:00 ص
+3️⃣ 02:00 م
+4️⃣ 04:00 م
+
+أي وقت يناسبك؟
+
+
+---
+
+## State 5: Confirm Booking
+
+### English:
+
+✅ Your appointment is confirmed!
+
+📋 Summary:
+
+Service: [Service Name]
+Date: [Date]
+Time: [Time]
+Location: [Clinic Address]
+
+We'll send you a reminder 24 hours before.
+See you soon! 😊
+
+
+### Arabic:
+
+✅ تم تأكيد موعدك!
+
+📋 الملخص:
+
+الخدمة: [اسم الخدمة]
+التاريخ: [التاريخ]
+الوقت: [الوقت]
+العنوان: [عنوان العيادة]
+
+سنرسل لك تذكيرا قبل 24 ساعة.
+نراك قريبا! 😊
+
+
+---
+
+## Nudge Messages
+
+### Nudge 1 (+1 hour) - FREE FORM
+
+**English:**
+
+Hi! Just a friendly reminder about your appointment with [Your Clinic Name] tomorrow at [Time]. See you then! 👋
+
+
+**Arabic:**
+
+مرحبا! تذكير ودي حول موعدك مع عيادة [اسم عيادتك] غدا الساعة [الوقت]. نراك هناك! 👋
+
+
+---
+
+### Nudge 2 (+24 hours) - TEMPLATE MESSAGE
+
+⚠️ *This requires WhatsApp-approved template. Note for production: "appointment_reminder_24h"*
+
+**English:**
+
+Your appointment is confirmed for tomorrow at [Time]. Reply CONFIRM to confirm or CANCEL to reschedule.
+
+
+**Arabic:**
+
+موعدك مؤكد غدا الساعة [الوقت]. رد بـ تأكيد للتأكيد أو إلغاء لإعادة الجدولة.
+
+
+---
+
+### Nudge 3 (+72 hours) - TEMPLATE MESSAGE
+
+⚠️ *This requires WhatsApp-approved template. Note for production: "appointment_reminder_72h"*
+
+**English:**
+
+We haven't heard from you. Your slot will be released if not confirmed. Please reply or call us at [Phone].
+
+
+**Arabic:**
+
+لم نسمع منك. سيتم إلغاء موعدك إذا لم يتم تأكيده. من فضلك رد أو اتصل بنا على [الهاتف].
+
+
+---
+
+## Handoff to Human
+
+**English (if user mentions health issue or complaint):**
+
+I understand this needs personal attention. Let me connect you with our team. They'll be with you shortly! 👨‍⚕️
+
+Please wait or call: [Your Clinic Phone Number]
+
+
+**Arabic:**
+
+أفهم أن هذا يحتاج انتباها شخصيا. دعني أتصل بفريقنا. سيكونون معك قريبا! 👨‍⚕️
+
+من فضلك انتظر أو اتصل: [رقم هاتف عيادتك]
+
+
+---
+
+## FAQ Responses
+
+**Question: "Are you open on weekends?"**
+
+English: "Yes! We're open Saturdays 9 AM - 3 PM, and closed Sundays. How can I help?"
+
+Arabic: "نعم! نحن مفتوحين يوم السبت من 9 ص إلى 3 م، مغلقون يوم الأحد. كيف يمكنني مساعدتك؟"
+
+---
+
+**Question: "Do you accept insurance?"**
+
+English: "We accept most major insurances. For specifics, please call us at [Phone] or ask to speak with our team."
+
+Arabic: "نحن نقبل معظم التأمينات الرئيسية. للتفاصيل، اتصل بنا على [الهاتف] أو اطلب التحدث مع فريقنا."
+
+---
+
+**Question: "What are your prices?"**
+
+English: "Our rates are:
+- General Checkup: $50
+- Professional Cleaning: $75
+- Teeth Whitening: $150
+- Root Canal: $300
+
+Would you like to book?"
+
+Arabic: "أسعارنا:
+- فحص عام: 50 دولار
+- تنظيف احترافي: 75 دولار
+- تبييض الأسنان: 150 دولار
+- معالجة جذر السن: 300 دولار
+
+هل تريد حجز موعد؟"
