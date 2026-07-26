@@ -71,12 +71,28 @@ The bot escalates to a human agent for:
 
 ### Project Files Structure
 
+```
 devsynt-ai-internship-irfan/
-├── README.md (this file)
+├── README.md
 └── task2-whatsapp-phase1/
-├── assets/
-│ ├── flow-diagram.png (Conversation flow visualization)
-│ ├── webhook-test-postman.png (Postman 200 OK response)
-│ └── webhook-execution-log.png (n8n receiving message)
-├── messages.md (All bot messages EN + AR)
-└── workflow.json (Exported n8n workflow)
+    ├── assets/
+    │   ├── flow-diagram.png
+    │   │   └── Conversation flow visualization
+    │   ├── webhook-test-postman.png
+    │   │   └── Postman 200 OK response
+    │   └── webhook-execution-log.png
+    │       └── n8n receiving message
+    ├── messages.md
+    │   └── All bot messages (English + Arabic)
+    └── workflow.json
+        └── Exported n8n workflow
+```
+
+### Current Status
+
+✅ **Completed:**
+- Conversation flow designed
+- All messages written in English and Arabic
+- n8n webhook created and tested
+- Postman mock testing successful
+- Workflow exported as JSON
