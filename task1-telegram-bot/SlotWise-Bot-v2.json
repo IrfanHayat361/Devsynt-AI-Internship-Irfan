@@ -1,0 +1,146 @@
+{
+  "name": "SlotWise-Bot-v2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0cf4ac07-88b9-4a64-a7ed-179aa39dc020",
+      "name": "Telegram Trigger",
+      "webhookId": "6e297d0d-6596-4965-b156-b16ca7a5fb46",
+      "credentials": {
+        "telegramApi": {
+          "id": "PTqzbvO0gBYniIIH",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ab6c84ce-a16f-402a-9a85-cf8ec7e5540d",
+      "name": "When chat message received",
+      "webhookId": "06cf9c5b-9742-47ee-a218-08915dc31728"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a50b946c-0837-49d1-8782-12977875c378",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "1c0e8592-09de-4d47-9f9b-cb4d3c01cc5b",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "kEw2YfHRW2g0FU8k",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "={{ $(\"Groq Chat Model\").output[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "adf47a22-69c0-4c18-afb0-0f944dde785d",
+      "name": "Send a text message",
+      "webhookId": "c86cd1ea-8d1f-42a0-8ef0-5f36d301873a",
+      "credentials": {
+        "telegramApi": {
+          "id": "PTqzbvO0gBYniIIH",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "71cccd69-cfbc-4439-b9a9-1ebc31198eea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3dc737565f906c1e8b0033b1c93986c68e7919ea8007be9d2dc2a27c432e440a"
+  },
+  "id": "91gYvuP9oMquFbux",
+  "tags": []
+}
