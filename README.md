@@ -21,78 +21,52 @@ This repository tracks my progress during the DevSynt Summer 2026 AI Automation 
 
 ---
 
-## Task 2: WhatsApp Bot - Phase 1 ✅
+# Project 2: SlotWise — AI Booking Concierge Bot
 
-### Niche Chosen
-**Dental Clinic Booking Bot** — A bilingual WhatsApp bot that helps patients book appointments at a dental clinic.
+A conversational Telegram bot built in n8n that helps customers book a restaurant table through a short, natural chat, powered by Groq's LLM.
 
-### Key Features
+## Niche
+Restaurant table booking
 
-#### 1. **Bilingual Support (English & Arabic)**
-- Bot automatically detects language from incoming messages
-- Arabic script detection triggers Arabic responses
-- Mid-conversation language switching is supported
-- All messages exist in both languages
+## How It Works
 
-#### 2. **Conversation States**
-- **State 0:** Language Detection (automatic, no message)
-- **State 1:** Greeting & Intent (Book appointment or Ask question?)
-- **State 2:** Service Selection (Checkup, Cleaning, Whitening)
-- **State 3:** Timing Preference (Tomorrow, 2-3 days, next week, specific date)
-- **State 4:** Available Slots (Mock calendar slots for chosen date)
-- **State 5:** Booking Confirmation (Summary with service, date, time)
+The bot guides a customer through the full booking flow in one AI Agent, using its system prompt and conversation memory:
 
-#### 3. **Human Handoff**
-The bot escalates to a human agent for:
-- Medical questions or health concerns
-- Complaints or disputes
-- Pricing negotiations
-- Anything off-script requiring judgment
+1. **Greeting** — greets the customer and asks whether they want to book a table or ask a question
+2. **Service / Occasion** — asks the occasion and party size
+3. **Timing** — asks preferred day and rough time
+4. **Slot Offer** — offers 3 fixed slots (6:00 PM, 7:30 PM, 9:00 PM)
+5. **Confirmation** — confirms the booking with a summary (party size, day, time)
+6. **Handoff** — if the customer negotiates pricing, complains, or goes off-script, the bot replies "Let me connect you with our team — someone will be with you shortly" instead of improvising
 
-**Why This Matters:** Medical queries need professional oversight. Complaints need empathy. Pricing needs negotiation. The handoff state is what makes this a professional solution, not a toy chatbot.
+## Workflow Structure
 
-#### 4. **Nudge System (Appointment Reminders)**
-- **+1h Nudge:** Free-form reminder message (within 24h WhatsApp window)
-- **+24h Nudge:** Template message (requires Meta approval — noted for production)
-- **+72h Final Nudge:** Template message (requires Meta approval — noted for production)
-- **Lost Lead:** If no response after +72h, mark as lost
+Telegram Trigger → AI Agent → Send a text message
+├── Groq Chat Model (llama-3.1-8b-instant)
+└── Simple Memory (keyed per Telegram chat ID)
 
-### Webhook Setup & Testing
 
-**Webhook Created:**
-- URL: `http://localhost:5678/webhook-test/whatsapp-incoming`
-- Method: POST
-- Status: ✅ Tested and working
+- **Telegram Trigger** — receives incoming messages
+- **AI Agent** — holds the full booking flow in its system prompt; handles greeting, service, timing, slots, confirmation, and handoff
+- **Groq Chat Model** — the LLM (llama-3.1-8b-instant) driving the conversation
+- **Simple Memory** — remembers each user's conversation, keyed by their Telegram chat ID, so the bot moves through the steps across messages
+- **Send a text message** — sends the bot's reply back to the user on Telegram
 
-**Testing Method:**
-- Used Postman to send mock WhatsApp messages to the webhook
-- Received 200 OK responses
-- n8n execution log shows messages received successfully
+## Tech Stack
+- n8n (locally hosted, exposed via ngrok static domain)
+- Telegram Bot API (bot created via @BotFather)
+- Groq API (free tier) for the LLM
 
-### Project Files Structure
+## Files
+- `SlotWise-Bot-v2.json` — exported n8n workflow
+- `Telegram-bot-workflow-SS.png` — screenshot of the workflow canvas
 
-```
-devsynt-ai-internship-irfan/
-├── README.md
-└── task2-whatsapp-phase1/
-    ├── assets/
-    │   ├── flow-diagram.png
-    │   │   └── Conversation flow visualization
-    │   ├── webhook-test-postman.png
-    │   │   └── Postman 200 OK response
-    │   └── webhook-execution-log.png
-    │       └── n8n receiving message
-    ├── messages.md
-    │   └── All bot messages (English + Arabic)
-    └── workflow.json
-        └── Exported n8n workflow
-```
+## Setup
+1. Import `SlotWise-Bot-v2.json` into n8n
+2. Add your own credentials in n8n:
+   - Telegram account (bot token from @BotFather)
+   - Groq account (API key from console.groq.com)
+3. Activate the workflow so the Telegram trigger listens for messages
 
-### Current Status
-
-✅ **Completed:**
-- Conversation flow designed
-- All messages written in English and Arabic
-- n8n webhook created and tested
-- Postman mock testing successful
-- Workflow exported as JSON
+## Notes
+Credentials are not included in the workflow file — add your own Telegram bot token and Groq API key in n8n's credentials manager after importing.
