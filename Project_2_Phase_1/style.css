@@ -1,0 +1,623 @@
+/* ============================================================
+   Project 2 — Phase 1
+   LangChain + LangGraph learning page
+   Direction: two-ink riso print. Cobalt + hot pink on cool paper.
+   Signature: the page itself is a graph — every section is a node
+   hung off one continuous edge running down the left.
+   ============================================================ */
+
+:root {
+  --paper:      #EEF0F4;
+  --paper-deep: #E2E6EE;
+  --ink:        #14161C;
+  --ink-soft:   #5A6070;
+  --cobalt:     #1F49C9;
+  --cobalt-dim: #ABBCEB;
+  --pink:       #F2317B;
+
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --font-body:    "Newsreader", Georgia, serif;
+  --font-mono:    "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --rail: 2px;
+  --gutter: 88px;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--paper-deep) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-deep) 1px, transparent 1px);
+  background-size: 26px 26px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+p { margin: 0 0 1.1em; }
+
+strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: rgba(31, 73, 201, 0.09);
+  color: var(--cobalt);
+  padding: 0.12em 0.34em;
+  border-radius: 3px;
+}
+
+a {
+  color: var(--cobalt);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover { color: var(--pink); }
+
+:focus-visible {
+  outline: 3px solid var(--pink);
+  outline-offset: 3px;
+}
+
+/* ---------- masthead ------------------------------------- */
+
+.masthead {
+  border-bottom: var(--rail) solid var(--ink);
+  padding: 76px 32px 0;
+}
+
+.masthead-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 26px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3.1rem, 10.5vw, 7.4rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  margin: 0 0 30px;
+}
+
+.title em {
+  font-style: normal;
+  color: var(--pink);
+}
+
+.strike-through {
+  position: relative;
+  color: var(--ink-soft);
+}
+
+.strike-through::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 52%;
+  height: 6px;
+  background: var(--pink);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: strike 700ms cubic-bezier(0.2, 0.8, 0.3, 1) 900ms forwards;
+}
+
+@keyframes strike { to { transform: scaleX(1); } }
+
+.standfirst {
+  font-size: clamp(1.05rem, 2.1vw, 1.35rem);
+  max-width: 52ch;
+  color: var(--ink-soft);
+  margin-bottom: 54px;
+}
+
+.hero-diagram {
+  border-top: 1px solid var(--cobalt-dim);
+  padding: 34px 0 44px;
+}
+
+.hero-diagram svg { width: 100%; height: auto; display: block; }
+
+/* ---------- shared svg language --------------------------- */
+
+.svg-node rect,
+.svg-node circle,
+.svg-node polygon {
+  fill: var(--paper);
+  stroke: var(--cobalt);
+  stroke-width: 2;
+}
+
+.svg-node text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--cobalt);
+  text-anchor: middle;
+}
+
+.svg-node-key rect,
+.svg-node-key polygon {
+  fill: var(--pink);
+  stroke: var(--pink);
+}
+
+.svg-node-key text { fill: #fff; }
+
+.svg-node-end circle { fill: var(--ink); stroke: var(--ink); }
+.svg-node-end text { fill: var(--paper); font-size: 11px; }
+
+.svg-edge {
+  stroke: var(--ink);
+  stroke-width: 2;
+  fill: none;
+}
+
+.svg-edge-branch { stroke: var(--pink); }
+
+.svg-edge-loop {
+  stroke: var(--cobalt);
+  stroke-dasharray: 4 5;
+}
+
+.svg-tip { fill: var(--ink); }
+
+.svg-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  fill: var(--ink-soft);
+}
+
+.svg-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--pink);
+}
+
+/* ---------- the flow: one long edge, sections as nodes ----- */
+
+.flow {
+  position: relative;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.flow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 190px;
+  left: calc(32px + 21px);
+  width: var(--rail);
+  background: var(--ink);
+}
+
+.node {
+  position: relative;
+  padding: 74px 0 74px var(--gutter);
+  border-bottom: 1px solid var(--cobalt-dim);
+}
+
+.node-last { border-bottom: 0; }
+
+.marker {
+  position: absolute;
+  left: 0;
+  top: 74px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: var(--rail) solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.node:hover > .marker {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+}
+
+/* the one place the rail forks — where chains stop being enough */
+.node-fork::after {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 96px;
+  width: 46px;
+  height: 96px;
+  border-left: var(--rail) solid var(--pink);
+  border-bottom: var(--rail) solid var(--pink);
+  border-bottom-left-radius: 26px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pink);
+  margin-bottom: 12px;
+}
+
+.node h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 4.4vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  margin: 0 0 26px;
+  max-width: 20ch;
+}
+
+.node p { max-width: 66ch; }
+
+.aside {
+  border-left: 3px solid var(--pink);
+  padding-left: 18px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* ---------- code ------------------------------------------ */
+
+pre {
+  margin: 0;
+  padding: 18px 20px;
+  background: var(--ink);
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: #DDE3F2;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+pre.wide { margin: 34px 0 30px; }
+
+/* ---------- before / after ------------------------------- */
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 34px 0 30px;
+}
+
+.compare-side {
+  border: 1px solid var(--cobalt-dim);
+  border-top: var(--rail) solid var(--ink-soft);
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.compare-side-win { border-top-color: var(--pink); }
+
+.compare-head {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.compare-foot {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+/* ---------- numbered trace ------------------------------- */
+
+.steps {
+  list-style: none;
+  counter-reset: trace;
+  margin: 30px 0;
+  padding: 0;
+  max-width: 62ch;
+}
+
+.steps li {
+  counter-increment: trace;
+  position: relative;
+  padding: 12px 0 12px 46px;
+  border-bottom: 1px dashed var(--cobalt-dim);
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+.steps li::before {
+  content: counter(trace);
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: var(--cobalt);
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.steps li span {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* ---------- concept cards -------------------------------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 16px;
+  margin: 32px 0;
+}
+
+.card {
+  border: 1px solid var(--ink);
+  padding: 20px 18px;
+  background: var(--paper);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--cobalt);
+}
+
+.card h3 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pink);
+  margin: 0 0 10px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+
+/* ---------- figure & table ------------------------------- */
+
+.figure {
+  margin: 36px 0 30px;
+  padding: 26px 20px 20px;
+  border: 1px solid var(--cobalt-dim);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.figure svg { width: 100%; height: auto; display: block; }
+
+.figure figcaption {
+  margin-top: 18px;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 30px 0;
+  font-size: 16px;
+}
+
+.table caption {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-bottom: 12px;
+}
+
+.table th {
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  padding: 10px 14px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.table th + th { background: var(--pink); }
+
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cobalt-dim);
+  vertical-align: top;
+}
+
+.table td + td { color: var(--ink); }
+.table td:first-child { color: var(--ink-soft); }
+
+/* ---------- callout & terms ------------------------------ */
+
+.callout {
+  background: var(--cobalt);
+  color: #EAF0FF;
+  padding: 26px 28px;
+  border-radius: 5px;
+  margin: 32px 0 8px;
+  max-width: 68ch;
+}
+
+.callout span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cobalt-dim);
+  margin-bottom: 10px;
+}
+
+.callout code {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.terms {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 30px 0 0;
+  padding: 0;
+}
+
+.terms li {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  padding: 5px 11px;
+  border: 1px solid var(--cobalt);
+  border-radius: 100px;
+  color: var(--cobalt);
+}
+
+.terms code {
+  background: none;
+  padding: 0;
+  font-size: 1em;
+}
+
+/* ---------- colophon ------------------------------------- */
+
+.colophon {
+  border-top: var(--rail) solid var(--ink);
+  margin-top: 20px;
+  padding: 58px 32px 76px;
+}
+
+.colophon-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.colophon-note {
+  max-width: 58ch;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin: 26px 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.colophon-sig {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ---------- responsive ----------------------------------- */
+
+@media (max-width: 760px) {
+  :root { --gutter: 56px; }
+
+  body { font-size: 17px; }
+
+  .masthead { padding-top: 46px; }
+
+  .flow { padding: 0 20px; }
+  .flow::before { left: calc(20px + 16px); }
+
+  .node { padding-top: 52px; padding-bottom: 52px; }
+
+  .marker {
+    top: 52px;
+    width: 34px;
+    height: 34px;
+    font-size: 11px;
+  }
+
+  .node-fork::after {
+    left: 16px;
+    top: 70px;
+    width: 32px;
+    height: 70px;
+    border-bottom-left-radius: 18px;
+  }
+
+  .compare { grid-template-columns: 1fr; }
+
+  .colophon { padding: 44px 20px 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .strike-through::after { transform: scaleX(1); }
+}

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LangChain + LangGraph — Phase 1 Learning Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DevSynt AI Automation Internship · Project 2, Phase 1</p>
+    <h1 class="title">A chain goes<br /><span class="strike-through">straight.</span><br />A graph <em>decides.</em></h1>
+    <p class="standfirst">
+      A summary of what I understood after spending this phase on LangChain and LangGraph. Each section
+      below covers one of the main topics, written in my own words along with the diagrams and small
+      code examples I used while learning them.
+    </p>
+
+    <div class="hero-diagram" role="img" aria-label="A chain runs prompt to LLM to parser to output in a fixed line. A graph runs from a task into a router that branches to one of two agents, with shared state looping between them.">
+      <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="svg-tip" />
+          </marker>
+        </defs>
+
+        <text x="0" y="16" class="svg-label">A CHAIN · same steps, same order, every time</text>
+        <line x1="72" y1="52" x2="128" y2="52" class="svg-edge" marker-end="url(#tip)" />
+        <line x1="212" y1="52" x2="268" y2="52" class="svg-edge" marker-end="url(#tip)" />
+        <line x1="352" y1="52" x2="408" y2="52" class="svg-edge" marker-end="url(#tip)" />
+        <g class="svg-node"><rect x="2" y="34" width="70" height="36" rx="4" /><text x="37" y="57">prompt</text></g>
+        <g class="svg-node"><rect x="128" y="34" width="84" height="36" rx="4" /><text x="170" y="57">LLM</text></g>
+        <g class="svg-node"><rect x="268" y="34" width="84" height="36" rx="4" /><text x="310" y="57">parser</text></g>
+        <g class="svg-node"><rect x="408" y="34" width="84" height="36" rx="4" /><text x="450" y="57">output</text></g>
+
+        <text x="0" y="128" class="svg-label">A GRAPH · the router picks the path each time</text>
+        <line x1="72" y1="164" x2="126" y2="164" class="svg-edge" marker-end="url(#tip)" />
+        <path d="M 214 164 C 250 164 250 122 288 122" class="svg-edge svg-edge-branch" marker-end="url(#tip)" />
+        <path d="M 214 164 C 250 164 250 190 288 190" class="svg-edge svg-edge-branch" marker-end="url(#tip)" />
+        <path d="M 392 122 C 470 122 470 190 392 190" class="svg-edge svg-edge-loop" />
+        <g class="svg-node"><rect x="2" y="146" width="70" height="36" rx="4" /><text x="37" y="169">task</text></g>
+        <g class="svg-node svg-node-key"><rect x="126" y="146" width="88" height="36" rx="4" /><text x="170" y="169">router</text></g>
+        <g class="svg-node"><rect x="288" y="104" width="104" height="36" rx="4" /><text x="340" y="127">clean data</text></g>
+        <g class="svg-node"><rect x="288" y="172" width="104" height="36" rx="4" /><text x="340" y="195">write report</text></g>
+        <text x="486" y="160" class="svg-note">shared state</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main class="flow">
+
+  <!-- 01 -->
+  <section class="node" id="langchain">
+    <span class="marker" aria-hidden="true">01</span>
+    <p class="kicker">The framework and its basic unit</p>
+    <h2>What LangChain is, and what a chain does</h2>
+    <p>
+      When we call an LLM API directly, we send one complete prompt and we get back one reply as plain
+      text. The prompt has to be written out fully each time and the reply has no fixed structure, so the
+      code that receives it has to figure out the meaning on its own.
+    </p>
+    <p>
+      LangChain is a framework that sits above that API call and provides reusable components for it. The
+      main ones are prompt templates, which are prompts written once with variables inside them, and
+      chains, which join those components into a single unit that can be called repeatedly. A normal chain
+      is prompt template → LLM → output parser. LangChain also makes it easy to switch between different
+      LLM providers, because the model is only one component of the chain, so changing from Gemini to Groq
+      does not require rewriting the rest of the code.
+    </p>
+    <p>
+      A chain, in simple words, is a sequence of steps connected together and run as one. The syntax used
+      for connecting them is called LCEL (LangChain Expression Language) and it uses the <code>|</code>
+      operator, which passes the output of the left side into the right side, same as a pipe in the
+      terminal.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side">
+        <p class="compare-head">Direct API call</p>
+<pre><code>prompt = f"Write a tagline for {name}."
+resp = client.generate(prompt)
+print(resp.text)
+
+# full prompt written each time,
+# reply comes back as plain text</code></pre>
+      </div>
+      <div class="compare-side compare-side-win">
+        <p class="compare-head">The same task written as a chain</p>
+<pre><code>from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+prompt = ChatPromptTemplate.from_template(
+    "Write a tagline for {name}."
+)
+
+chain = prompt | llm | StrOutputParser()
+
+chain.invoke({"name": "DevSynt"})
+chain.invoke({"name": "Daraz"})   # reused, nothing rewritten</code></pre>
+      </div>
+    </div>
+    <p class="aside">
+      One point which is worth noting is that LangChain is not changing the model in any way. The API call
+      happening underneath is exactly the same. The difference is only that the prompt, the model and the
+      parsing step are now separate components which can be replaced individually.
+    </p>
+    <ul class="terms">
+      <li>LLM wrapper</li><li>prompt template</li><li>chain</li><li>LCEL</li><li><code>|</code> operator</li>
+    </ul>
+  </section>
+
+  <!-- 02 -->
+  <section class="node" id="templates">
+    <span class="marker" aria-hidden="true">02</span>
+    <p class="kicker">Controlling the input and the output</p>
+    <h2>Prompt templates and output parsers</h2>
+    <p>
+      These two are usually explained together but they are solving two different problems, one on the
+      input side and one on the output side.
+    </p>
+    <p>
+      A prompt template handles the input. The instruction is written once with placeholders inside curly
+      braces, for example <code>{product_name}</code>, and then different values are passed in whenever the
+      template is used. So instead of keeping many similar prompt strings in the code, there is one
+      template and many different inputs.
+    </p>
+    <p>
+      An output parser handles the reply. By default an LLM answers in normal free-flowing text, which is
+      easy for a person to read but not reliable for code, because there is no fixed field to read a value
+      from. An output parser instructs the model to answer in a defined structure, mostly JSON, and then
+      converts that reply into a form the code can use directly.
+    </p>
+    <p>
+      There are different parsers for different needs. <code>StrOutputParser</code> simply returns the
+      text content of the response. <code>JsonOutputParser</code> returns a dictionary, and when it is
+      used together with a Pydantic model, the required fields and their data types are defined in advance
+      and those requirements are included in the instructions sent to the model.
+    </p>
+
+    <div class="compare">
+      <div class="compare-side">
+        <p class="compare-head">Reply from a plain prompt</p>
+<pre><code>"Overall this review is pretty positive!
+I'd say around 4 out of 5, although the
+customer did complain about how long
+the delivery took."</code></pre>
+        <p class="compare-foot">The information is there but the code has to extract it from a sentence, which will fail whenever the wording changes.</p>
+      </div>
+      <div class="compare-side compare-side-win">
+        <p class="compare-head">Same question with an output parser</p>
+<pre><code>class Review(BaseModel):
+    sentiment: str = Field(description="positive or negative")
+    score: int     = Field(description="1 to 5")
+    complaint: str
+
+parser = JsonOutputParser(pydantic_object=Review)
+chain  = prompt | llm | parser
+
+result = chain.invoke({"text": review})
+
+# {'sentiment': 'positive', 'score': 4,
+#  'complaint': 'slow delivery'}</code></pre>
+        <p class="compare-foot">The value is now read directly as <code>result["score"]</code>.</p>
+      </div>
+    </div>
+    <p class="aside">
+      An important detail here is that the parser is working on both sides. It adds the format
+      instructions into the prompt before it is sent, and after the reply comes back it converts that
+      reply into a Python object. It is not only cleaning the output at the end.
+    </p>
+    <ul class="terms">
+      <li>PromptTemplate</li><li>StrOutputParser</li><li>JsonOutputParser</li><li>structured output</li><li>Pydantic models</li>
+    </ul>
+  </section>
+
+  <!-- 03 -->
+  <section class="node" id="memory">
+    <span class="marker" aria-hidden="true">03</span>
+    <p class="kicker">Context across calls, and access to functions</p>
+    <h2>What memory and tool-calling mean for an LLM app</h2>
+    <p>
+      By default an LLM has no memory and every call is completely independent. If the first question is
+      about the weather in Karachi and the follow up question is "what about Lahore", the second call has
+      no information about the first one, so it cannot understand what is being referred to.
+    </p>
+    <p>
+      Memory means keeping a record of the conversation so far and sending it back with every new call. So
+      the model is not actually storing anything on its side, the previous messages are being provided to
+      it again each time. Because of this the message history keeps growing, and in longer conversations it
+      has to be trimmed or summarised, otherwise every call becomes heavier.
+    </p>
+    <p>
+      Tool-calling means giving the LLM access to functions that it can choose to use instead of guessing
+      an answer from what it already knows. This is used for things the model cannot know reliably, like a
+      live exchange rate, a record in our database, or an exact calculation. Every function is described to
+      the model through a tool schema, which contains the name of the function, what it is used for, and
+      the arguments it accepts. Based on the question, the model decides whether a tool is needed, which
+      one to use, and what values to pass into it.
+    </p>
+    <p>
+      The sequence in which a tool call actually happens is given below:
+    </p>
+
+    <ol class="steps">
+      <li><span>The user asks a question</span> "What is the weather in Islamabad right now?"</li>
+      <li><span>The model returns a tool call</span> it responds with <code>get_weather(city="Islamabad")</code> instead of an answer</li>
+      <li><span>The application runs the function</span> this part is normal code, it calls the actual weather API</li>
+      <li><span>The result is sent back to the model</span> <code>{"temp_c": 31, "sky": "clear"}</code></li>
+      <li><span>The model gives the final answer</span> "It is 31°C and clear in Islamabad right now."</li>
+    </ol>
+    <p class="aside">
+      The important point in this flow is that the model itself never executes the function. It only
+      selects the tool and provides the arguments, the execution is done by our own code, and the model
+      only sees the result once it is passed back to it.
+    </p>
+    <ul class="terms">
+      <li>conversation memory</li><li>chat history</li><li>tool / function calling</li><li>tool schema</li>
+    </ul>
+  </section>
+
+  <!-- 04 -->
+  <section class="node node-fork" id="langgraph">
+    <span class="marker" aria-hidden="true">04</span>
+    <p class="kicker">Moving from a fixed sequence to a decision</p>
+    <h2>What LangGraph is, and the difference between a chain and an agent</h2>
+    <p>
+      A chain runs a fixed sequence of steps and the order always remains the same. This is suitable when
+      the steps never change. But many tasks require a decision in the middle of the process, for example
+      checking whether the data is clean and sending it for cleaning if it is not, repeating a step when
+      the output fails validation, or skipping a step completely when it is not required.
+    </p>
+    <p>
+      Such logic can be handled with <code>if</code> conditions around chains up to a certain limit, but
+      after that the code becomes difficult to follow and it is not clear anymore which paths are actually
+      possible in the system.
+    </p>
+    <p>
+      An agent is different from a chain because it looks at the current situation and decides what to do
+      next, rather than following a route that was already fixed while writing the code. LangGraph is the
+      library used to build these decision-making systems. In LangGraph the application is defined as a
+      graph instead of a straight line, the possible steps and the connections between them are declared
+      first, and which connection is followed is decided at runtime on the basis of the data.
+    </p>
+
+    <table class="table">
+      <caption>Difference between a chain and an agent</caption>
+      <thead><tr><th scope="col">Chain</th><th scope="col">Agent (graph)</th></tr></thead>
+      <tbody>
+        <tr><td>The path is fixed at the time of writing the code</td><td>The path is decided at runtime</td></tr>
+        <tr><td>Runs from start to end once, in order</td><td>Can loop back, repeat a step or stop early</td></tr>
+        <tr><td>Output of one step is passed into the next step</td><td>All the steps share one state which they read and update</td></tr>
+        <tr><td>Suitable for a predictable task</td><td>Required when the next step depends on the result</td></tr>
+      </tbody>
+    </table>
+    <ul class="terms">
+      <li>graph vs. chain</li><li>agent</li><li>runtime decision</li>
+    </ul>
+  </section>
+
+  <!-- 05 -->
+  <section class="node" id="concepts">
+    <span class="marker" aria-hidden="true">05</span>
+    <p class="kicker">The four core concepts of a graph</p>
+    <h2>Nodes, edges, state and conditional edges</h2>
+    <p>
+      LangGraph is mainly built on four concepts, and everything else is made using these.
+    </p>
+
+    <div class="cards">
+      <article class="card">
+        <h3>Node</h3>
+        <p>One step in the graph. In the code it is a normal Python function which receives the state, performs its work and returns the values it has updated.</p>
+      </article>
+      <article class="card">
+        <h3>Edge</h3>
+        <p>A fixed connection between two nodes, showing what runs next. There is no decision involved in it, the next step is always the same one.</p>
+      </article>
+      <article class="card">
+        <h3>Conditional edge</h3>
+        <p>A decision point. A function checks the state and returns the name of the node which should run next, so the same graph can follow different paths.</p>
+      </article>
+      <article class="card">
+        <h3>State</h3>
+        <p>The shared data which moves through the graph. Every node can read it and add to it, so a later node is able to see what an earlier node has produced.</p>
+      </article>
+    </div>
+
+    <p>
+      The diagram below is the small graph I made while practicing this, it checks an order and decides
+      what should happen next depending on whether the item is in stock. It is a simple example but all
+      four concepts are present in it.
+    </p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph: check order flows into a conditional edge asking if the item is in stock, which routes either to ship it or to notify customer, and both then reach END.">
+        <defs>
+          <marker id="tip2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="svg-tip" />
+          </marker>
+        </defs>
+        <line x1="112" y1="125" x2="176" y2="125" class="svg-edge" marker-end="url(#tip2)" />
+        <path d="M 264 125 C 300 125 300 62 344 62" class="svg-edge" marker-end="url(#tip2)" />
+        <path d="M 264 125 C 300 125 300 188 344 188" class="svg-edge" marker-end="url(#tip2)" />
+        <path d="M 468 62 C 520 62 520 110 546 118" class="svg-edge" marker-end="url(#tip2)" />
+        <path d="M 468 188 C 520 188 520 140 546 132" class="svg-edge" marker-end="url(#tip2)" />
+        <g class="svg-node"><rect x="10" y="107" width="102" height="38" rx="4" /><text x="61" y="131">check order</text></g>
+        <g class="svg-node svg-node-key"><polygon points="220,95 268,125 220,155 172,125" /><text x="220" y="130">in stock?</text></g>
+        <g class="svg-node"><rect x="344" y="43" width="124" height="38" rx="4" /><text x="406" y="67">ship it</text></g>
+        <g class="svg-node"><rect x="344" y="169" width="124" height="38" rx="4" /><text x="406" y="193">notify customer</text></g>
+        <g class="svg-node svg-node-end"><circle cx="570" cy="125" r="22" /><text x="570" y="130">END</text></g>
+        <text x="292" y="86" class="svg-note">yes</text>
+        <text x="292" y="178" class="svg-note">no</text>
+      </svg>
+      <figcaption>
+        Three nodes, one conditional edge (shown as the pink diamond), two normal edges going to END, and
+        one field of state, <code>in_stock</code>, which the decision is based on.
+      </figcaption>
+    </figure>
+
+<pre class="wide"><code>from typing import TypedDict
+from langgraph.graph import StateGraph, END
+
+# the state, this data is available to every node
+class OrderState(TypedDict):
+    order_id: str
+    in_stock: bool
+
+# a node, it receives the state and returns what it updated
+def check_order(state):
+    return {"in_stock": lookup(state["order_id"])}
+
+# the function used by the conditional edge.
+# it returns the NAME of the next node, not a result.
+def route(state):
+    return "ship" if state["in_stock"] else "notify"
+
+g = StateGraph(OrderState)
+g.add_node("check", check_order)
+g.add_node("ship", ship_it)
+g.add_node("notify", notify_customer)
+
+g.set_entry_point("check")
+g.add_conditional_edges("check", route)  # decided at runtime
+g.add_edge("ship", END)                  # always goes to END
+g.add_edge("notify", END)
+
+app = g.compile()
+app.invoke({"order_id": "A-1042"})</code></pre>
+    <p class="aside">
+      The main thing to notice in this code is that <code>route()</code> does not perform any work and it
+      does not return data, it returns the name of the next node as a string. This is the actual difference
+      between a normal edge and a conditional edge, one of them is fixed in the code while the other one is
+      the return value of a function.
+    </p>
+    <ul class="terms">
+      <li>node</li><li>edge</li><li>conditional edge</li><li>state</li><li>StateGraph</li><li>entry point</li><li>END</li>
+    </ul>
+  </section>
+
+  <!-- 06 -->
+  <section class="node node-last" id="orchestrator">
+    <span class="marker" aria-hidden="true">06</span>
+    <p class="kicker">The pattern used in the upcoming project</p>
+    <h2>What an orchestrator agent is, and why our project needs one</h2>
+    <p>
+      An orchestrator agent, which is also called a router or a supervisor, receives a task, works out
+      what type of task it is, and then routes it to the specialised agent which should handle it. In
+      most cases it does not perform the actual work itself. It can be understood like a manager, it
+      does not clean the data or write the report, it decides who will do it, then looks at the result
+      and decides whether any further step is needed.
+    </p>
+    <p>
+      Every specialised agent is a separate node with one narrow responsibility and its own focused
+      prompt. All of them read from and write to the same shared state, so whatever the cleaning agent
+      produces is already available when the analysis agent runs and the results do not have to be passed
+      manually between them.
+    </p>
+    <p>
+      While going through the official multi-agent example, the part I traced was how the supervisor
+      decides where each task should be sent. It is the same conditional edge concept explained above,
+      the only difference is that agents are placed on the branches instead of simple functions.
+    </p>
+    <p class="callout">
+      <span>Why this pattern is required in our upcoming project</span>
+      Our orchestrator agent receives raw data and it cannot know in advance what kind of data it has
+      been given. If the data is messy it has to be sent to the cleaning agent first, if it is already
+      clean it can go directly for analysis, and if a step fails then it has to be routed back and
+      attempted again. All of this is decided from the data while the program is running. A chain cannot
+      handle this because in a chain the path is already fixed before anything runs, and this is the
+      reason the project needs LangGraph and not only LangChain.
+    </p>
+    <ul class="terms">
+      <li>orchestrator / router pattern</li><li>supervisor agent</li><li>multi-agent system</li><li>shared state between agents</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="colophon">
+  <div class="colophon-inner">
+    <p class="colophon-note">
+      Prepared for Phase 1 of the DevSynt AI Automation Internship, based on the official LangChain and
+      LangGraph documentation, the LangGraph multi-agent collaboration tutorial, and the small examples
+      and diagrams I worked through while studying these topics.
+    </p>
+    <ul class="links">
+      <li><a href="https://python.langchain.com/docs/introduction/">LangChain docs</a></li>
+      <li><a href="https://python.langchain.com/docs/concepts/output_parsers/">Output parsers</a></li>
+      <li><a href="https://python.langchain.com/docs/concepts/tool_calling/">Tool calling</a></li>
+      <li><a href="https://langchain-ai.github.io/langgraph/concepts/low_level/">LangGraph concepts</a></li>
+      <li><a href="https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/">Multi-agent tutorial</a></li>
+      <li><a href="https://academy.langchain.com">LangChain Academy</a></li>
+    </ul>
+    <p class="colophon-sig">Project 2 · Phase 1 · Mentor: Afnan Shoukat</p>
+  </div>
+</footer>
+
+</body>
+</html>
