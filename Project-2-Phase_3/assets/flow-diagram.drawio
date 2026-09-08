@@ -1,0 +1,93 @@
+<mxfile host="app.diagrams.net" modified="2026-09-08T17:00:00.000Z" agent="5.0" version="20.3.0">
+  <diagram id="flow-diagram" name="Phase 3 Pipeline">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" background="ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- Title -->
+        <mxCell id="title" value="Production-Grade Multi-Agent Retail Data Pipeline - Phase 3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#667eea;" vertex="1" parent="1">
+          <mxGeometry x="100" y="20" width="1000" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- Input -->
+        <mxCell id="input" value="Raw CSV Data&#10;(5 Different Domains)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6e6;strokeColor=#ff6b6b;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="80" width="300" height="80" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow 1 -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="input" target="domain">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Domain Config Agent (NEW) -->
+        <mxCell id="domain" value="Domain Configuration Agent&#10;(NEW)&#10;&#10;Detects:&#10;• Retail&#10;• E-Commerce&#10;• Inventory&#10;• Restaurant&#10;• SaaS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f4ff;strokeColor=#667eea;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="200" width="400" height="140" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow 2 -->
+        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="domain" target="orchestrator">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Orchestrator Agent (UPDATED) -->
+        <mxCell id="orchestrator" value="Orchestrator Agent&#10;(UPDATED)&#10;&#10;Routes data flow based on&#10;domain configuration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f4ff;strokeColor=#667eea;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="450" y="390" width="300" height="100" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow 3 - Split to three agents -->
+        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="orchestrator" target="clean">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Clean Agent -->
+        <mxCell id="clean" value="Clean Agent&#10;&#10;• Missing values&#10;• Data types&#10;• Duplicates&#10;• Invalid rows" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#764ba2;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="540" width="220" height="120" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow Clean to Analysis -->
+        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="clean" target="analysis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Analysis Agent -->
+        <mxCell id="analysis" value="Analysis Agent (EDA)&#10;&#10;• Total sales/revenue&#10;• Top performers&#10;• Regional breakdown&#10;• Category analysis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#764ba2;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="390" y="540" width="220" height="120" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow Analysis to Dashboard -->
+        <mxCell id="arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="analysis" target="dashboard">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Dynamic Dashboard Agent (NEW) -->
+        <mxCell id="dashboard" value="Dynamic Dashboard Agent&#10;(NEW)&#10;&#10;• Adaptive charts&#10;• Domain-specific metrics&#10;• HTML dashboard&#10;• Embedded visualizations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#764ba2;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="540" width="220" height="120" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrow to Output -->
+        <mxCell id="arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="dashboard" target="output">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Output -->
+        <mxCell id="output" value="Output Files (Per Dataset)&#10;&#10;• dashboard.html&#10;• top_items.png&#10;• distribution.png&#10;• category_performance.png" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#51cf66;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="720" width="400" height="100" as="geometry"/>
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend1" value="NEW in Phase 3" style="fillColor=#f5f0ff;strokeColor=#764ba2;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="200" width="150" height="40" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend2" value="UPDATED in Phase 3" style="fillColor=#f0f4ff;strokeColor=#667eea;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="260" width="150" height="40" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend3" value="EXISTING" style="fillColor=#f5f0ff;strokeColor=#764ba2;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="320" width="150" height="40" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
